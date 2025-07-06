@@ -1,20 +1,34 @@
+from typing import Literal
+
 import numpy as np
 import pandas as pd
 
 from .client import Client
-from .downloaders import HybridDownloader
+from .downloaders import ApiDownloader, HybridDownloader, VisionDownloader
 from .utils import interval2freq
 
+DownloaderType = Literal["hybrid", "api", "vision"]
 
-async def download(symbol: str, interval: str, start: int, end: int) -> pd.DataFrame:
-    downloader = HybridDownloader()
+DOWNLOADERS: dict[DownloaderType, type] = {
+    "hybrid": HybridDownloader,
+    "api": ApiDownloader,
+    "vision": VisionDownloader,
+}
+
+
+async def download(
+    symbol: str, interval: str, start: int, end: int, downloader_type: DownloaderType
+) -> pd.DataFrame:
+    if downloader_type not in DOWNLOADERS:
+        raise ValueError(f"Unsupported downloader type: {downloader_type}")
+
+    downloader_class = DOWNLOADERS[downloader_type]
+    downloader = downloader_class()
 
     async with Client() as client:
         ohlcv = await downloader.download(client, symbol, interval, start, end)
 
-    df = _create_dataframe(ohlcv, interval)
-
-    return df
+    return _create_dataframe(ohlcv, interval)
 
 
 def _create_dataframe(ohlcv: np.ndarray, interval: str) -> pd.DataFrame:
