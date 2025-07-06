@@ -1,5 +1,4 @@
 from asyncio import as_completed, create_task
-from typing import AsyncGenerator
 
 import numpy as np
 
@@ -14,7 +13,7 @@ LIMIT = 1000
 class ApiStreamer(BaseStreamer):
     async def stream(
         self, client: Client, symbol: str, interval: str, start: int, end: int
-    ) -> AsyncGenerator[np.ndarray]:
+    ):
         client.set_base_url(APIS[1])
 
         step = interval2ms(interval)
