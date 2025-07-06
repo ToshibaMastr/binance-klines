@@ -135,7 +135,6 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = []
 lint = [
     { name = "pyright", specifier = ">=1.1.397" },
     { name = "ruff", specifier = ">=0.11.0" },

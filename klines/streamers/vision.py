@@ -7,15 +7,15 @@ import numpy as np
 from dateutil.relativedelta import relativedelta
 
 from ..client import Client
-from .base import BaseDownloader
+from .base import BaseStreamer
 
 DATA_API = "https://data.binance.vision/data/futures/um/monthly/klines"
 
 
-class VisionDownloader(BaseDownloader):
-    async def download(
+class VisionStreamer(BaseStreamer):
+    async def stream(
         self, client: Client, symbol: str, interval: str, start: int, end: int
-    ) -> np.ndarray:
+    ):
         client.set_base_url(DATA_API)
 
         current = datetime.utcfromtimestamp(start // 1000)
@@ -28,24 +28,18 @@ class VisionDownloader(BaseDownloader):
             tasks.append(create_task(client.get(filepath)))
             current += relativedelta(months=1)
 
-        chunks = []
         for task in as_completed(tasks):
             resp = await task
             if resp.status_code == 404:
                 continue
             resp.raise_for_status()
 
-            chunk = parse_zip(BytesIO(resp.content))
-            chunks.append(chunk)
+            yield self._parse_zip(BytesIO(resp.content))
 
-        chunks = np.vstack(chunks)
-
-        return chunks
-
-
-def parse_zip(raw: BytesIO) -> np.ndarray:
-    with zipfile.ZipFile(raw) as z:
-        name = z.namelist()[0]
-        with z.open(name) as f:
-            chunk = np.genfromtxt(f, delimiter=",", skip_header=1, dtype=float)
-            return chunk
+    @staticmethod
+    def _parse_zip(raw: BytesIO) -> np.ndarray:
+        with zipfile.ZipFile(raw) as z:
+            name = z.namelist()[0]
+            with z.open(name) as f:
+                chunk = np.genfromtxt(f, delimiter=",", skip_header=1, dtype=float)
+                return chunk
