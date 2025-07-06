@@ -1,5 +1,5 @@
-import asyncio
 import zipfile
+from asyncio import as_completed, create_task
 from datetime import datetime
 from io import BytesIO
 
@@ -13,9 +13,6 @@ DATA_API = "https://data.binance.vision/data/futures/um/monthly/klines"
 
 
 class VisionDownloader(BaseDownloader):
-    def __init__(self):
-        pass
-
     async def download(
         self, client: Client, symbol: str, interval: str, start: int, end: int
     ) -> np.ndarray:
@@ -25,16 +22,14 @@ class VisionDownloader(BaseDownloader):
         end_date = datetime.utcfromtimestamp(end // 1000)
 
         tasks = []
-        chunks = []
-
         while current <= end_date:
             date = current.strftime("%Y-%m")
             filepath = f"/{symbol}/{interval}/{symbol}-{interval}-{date}.zip"
-            task = asyncio.create_task(client.get(filepath))
-            tasks.append(task)
+            tasks.append(create_task(client.get(filepath)))
             current += relativedelta(months=1)
 
-        for task in asyncio.as_completed(tasks):
+        chunks = []
+        for task in as_completed(tasks):
             resp = await task
             if resp.status_code == 404:
                 continue

@@ -1,4 +1,4 @@
-import asyncio
+from asyncio import as_completed, create_task
 
 import numpy as np
 
@@ -11,6 +11,7 @@ APIS = [f"https://api{i}.binance.com" for i in range(1, 5)]
 
 class ApiDownloader(BaseDownloader):
     def __init__(self, limit: int = 1000):
+        super().__init__()
         self.limit = limit
 
     async def download(
@@ -34,11 +35,10 @@ class ApiDownloader(BaseDownloader):
             }
             collected += self.limit
 
-            task = asyncio.create_task(client.get("/api/v3/klines", params))
-            tasks.append(task)
+            tasks.append(create_task(client.get("/api/v3/klines", params)))
 
         total = 0
-        for task in asyncio.as_completed(tasks):
+        for task in as_completed(tasks):
             resp = await task
             resp.raise_for_status()
             data = resp.json()

@@ -9,6 +9,7 @@ from .vision import VisionDownloader
 
 class HybridDownloader(BaseDownloader):
     def __init__(self):
+        super().__init__()
         self.apid = ApiDownloader()
         self.visiond = VisionDownloader()
 
