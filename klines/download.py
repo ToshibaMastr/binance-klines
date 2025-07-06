@@ -17,7 +17,11 @@ DOWNLOADERS: dict[DownloaderType, type] = {
 
 
 async def download(
-    symbol: str, interval: str, start: int, end: int, downloader_type: DownloaderType
+    symbol: str,
+    interval: str,
+    start: int,
+    end: int,
+    downloader_type: DownloaderType = "hybrid",
 ) -> pd.DataFrame:
     if downloader_type not in DOWNLOADERS:
         raise ValueError(f"Unsupported downloader type: {downloader_type}")
