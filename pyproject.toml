@@ -1,0 +1,15 @@
+[project]
+name = "binance-klines"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "httpx[http2]>=0.28.1",
+    "numpy>=2.3.1",
+    "pandas>=2.3.0",
+]
+
+[dependency-groups]
+dev = []
+lint = ["pyright>=1.1.397", "ruff>=0.11.0"]
