@@ -9,5 +9,4 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = []
 lint = ["pyright>=1.1.397", "ruff>=0.11.0"]
