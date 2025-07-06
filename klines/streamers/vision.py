@@ -33,7 +33,6 @@ class VisionStreamer(BaseStreamer):
             if resp.status_code == 404:
                 continue
             resp.raise_for_status()
-
             yield self._parse_zip(BytesIO(resp.content))
 
     @staticmethod

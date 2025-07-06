@@ -15,12 +15,9 @@ class ApiStreamer(BaseStreamer):
         self, client: Client, symbol: str, interval: str, start: int, end: int
     ):
         client.set_base_url(APIS[1])
-
         step = interval2ms(interval)
 
         tasks = []
-        collected = 0
-
         for current in range(start, end, step * LIMIT):
             params = {
                 "symbol": symbol,
@@ -29,8 +26,6 @@ class ApiStreamer(BaseStreamer):
                 "endTime": current + step * LIMIT,
                 "limit": LIMIT,
             }
-            collected += LIMIT
-
             tasks.append(create_task(client.get("/api/v3/klines", params)))
 
         for task in as_completed(tasks):

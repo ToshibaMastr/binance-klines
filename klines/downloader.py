@@ -25,7 +25,7 @@ class OHLCVDownloader:
     def __init__(
         self, max_workers: int = 4, streamers: list[StreamerType] = ["vision", "api"]
     ):
-        self.progress_hooks: list[Callable] = []
+        self.progress_hook: Callable | None = None
         self.max_workers = max_workers
 
         self.streamers = [STREAMERS[s]() for s in streamers]
@@ -79,8 +79,8 @@ class OHLCVDownloader:
         return ohlcv
 
     def _hook_progress(self, status: ProgressEvent):
-        for ph in self.progress_hooks:
-            ph(status)
+        if self.progress_hook:
+            self.progress_hook(status)
 
-    def add_progress_hook(self, ph: Callable):
-        self.progress_hooks.append(ph)
+    def set_progress_hook(self, progress_hook: Callable):
+        self.progress_hook = progress_hook
